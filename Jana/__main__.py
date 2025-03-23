@@ -1,3 +1,4 @@
+
 import importlib
 import re
 import time
@@ -26,8 +27,8 @@ from telegram.ext.dispatcher import DispatcherHandlerStop
 from telegram.utils.helpers import escape_markdown
 from telethon import __version__ as tlhver
 
-from Jana.modules.no_sql import get_served_chats,get_served_users
-from Jana import (
+import AdisaX.modules.no_sql.users_db as sql
+from AdisaX import (
     BOT_NAME,
     BOT_USERNAME,
     LOGGER,
@@ -41,9 +42,22 @@ from Jana import (
     telethn,
     updater,
 )
-from Jana.modules import ALL_MODULES
-from Jana.modules.helper_funcs.chat_status import is_user_admin
-from Jana.modules.helper_funcs.misc import paginate_modules
+from AdisaX.modules import ALL_MODULES
+from AdisaX.modules.helper_funcs.chat_status import is_user_admin
+from AdisaX.modules.helper_funcs.misc import paginate_modules
+
+
+
+def gib_repo_callback(update, context):
+    query = update.callback_query
+    chat_id = query.message.chat_id
+    video_url = "https://te.legra.ph/file/b937a964b6289cdf3e958.mp4"
+    
+    reply_markup = InlineKeyboardMarkup([
+        [InlineKeyboardButton(text="◁", callback_data="help_back")]
+    ])
+    
+    context.bot.send_video(chat_id=chat_id, video=video_url, reply_markup=reply_markup)
 
 
 def get_readable_time(seconds: int) -> str:
@@ -70,34 +84,54 @@ def get_readable_time(seconds: int) -> str:
 
     return ping_time
 PM_START_TEX = """
-ʜᴇʟʟᴏ `{}`, ʜᴏᴡ ᴀʀᴇ ʏᴏᴜ \nᴡᴀɪᴛ ᴀ ᴍᴏᴍᴇɴᴛ ʙʀᴏ . . . 
+ʀᴀᴍ ʀᴀᴍ `{}`, ʜᴏᴡ ʀ ᴜ \n 💙💛 ғᴜʟғɪʟʟɪɴɢ ᴛʜᴇ ʟᴏᴠᴇ 💜♥️
 """
 
 
 PM_START_TEXT = """ 
-*ʜᴇʏ* {} , 🥀
-*๏ ɪ'ᴍ {} ʜᴇʀᴇ ᴛᴏ ʜᴇʟᴘ ʏᴏᴜ ᴍᴀɴᴀɢᴇ ʏᴏᴜʀ ɢʀᴏᴜᴘs!
-ʜɪᴛ ʜᴇʟᴘ ᴛᴏ ғɪɴᴅ ᴏᴜᴛ ᴍᴏʀᴇ ᴀʙᴏᴜᴛ ʜᴏᴡ ᴛᴏ ᴜsᴇ ᴍᴇ ɪɴ ᴍʏ ғᴜʟʟ ᴘᴏᴛᴇɴᴛɪᴀʟ!*
-➻ *ᴛʜᴇ ᴍᴏsᴛ ᴩᴏᴡᴇʀғᴜʟ ᴛᴇʟᴇɢʀᴀᴍ ɢʀᴏᴜᴩ ᴍᴀɴᴀɢᴇᴍᴇɴᴛ ʙᴏᴛ ᴀɴᴅ ɪ ʜᴀᴠᴇ sᴏᴍᴇ ᴀᴡᴇsᴏᴍᴇ ᴀɴᴅ ᴜsᴇғᴜʟ ғᴇᴀᴛᴜʀᴇs.*
+*ʀᴀᴍ ʀᴀᴍ* {} , 🚩
+
+*╭══════════💚═╮
+     {}
+╰═💜══════════╯
+
+🤍 ɪ ʟᴏᴠᴇ ᴍᴇ sᴏ ᴍᴜᴄʜ ❤️
+
+тнιѕ вσт σηℓу ƒσя мαηαgємєηт😊
+
+🖤🖤🖤🖤🖤🖤⇣❥ Super smooth🔸
+♥️♥️♥️♥️♥️⇣❥ super advance🔸
+💙💙💙💙⇣❥chatbot added🔸
+💜💜💜⇣❥deploy on VPS🔸
+💛💛⇣❥love themed🔸*
+─────────────────
+   *➻ ᴜsᴇʀs »* {}
+   *➻ ᴄʜᴀᴛs »* {}
+─────────────────
+💚 ᴍᴀᴅᴇ ʙʏ [KAIRNEX](https://t.me/Kairnex)
+
 """
 
 buttons = [
     [
-        
-        InlineKeyboardButton(text="🛡️", callback_data="mukesh_"),
-        InlineKeyboardButton(text="💳", callback_data="source_"),
-        InlineKeyboardButton(text="🧑‍💻", url=f"tg://user?id={OWNER_ID}"),
-        InlineKeyboardButton(text="🖥️", callback_data="Main_help"),
-     ],
-    [
         InlineKeyboardButton(
-            text="Aᴅᴅ Mᴇ ᴛᴏ Yᴏᴜʀ Gʀᴏᴜᴘ",
+            text="«« ᴀᴅᴅ ᴍᴇ »»",
             url=f"https://t.me/{dispatcher.bot.username}?startgroup=true",
         ),
     ],
     [
-        InlineKeyboardButton(text="📚 ʜᴇʟᴘ ᴀɴᴅ ᴄᴏᴍᴍᴀɴᴅs", callback_data="Main_help"),
+        InlineKeyboardButton(text="ᴄᴏᴍᴍᴀɴᴅs", callback_data="help_back"),
     ],
+    [
+        InlineKeyboardButton(text="ᴅᴇᴠs", url=f"tg://user?id={OWNER_ID}"),
+        InlineKeyboardButton(text="ʟᴏᴠᴇ", callback_data="source_"),
+    ],
+    [
+        InlineKeyboardButton(text="ᴅᴏɴᴀᴛᴇ", callback_data="donation_help"),
+    ],
+   # [
+ #       InlineKeyboardButton(text="📚 ʜᴇʟᴘ ᴀɴᴅ ᴄᴏᴍᴍᴀɴᴅs", callback_data="Main_help"),
+ #   ],
     
 
 ]
@@ -108,7 +142,7 @@ HELP_STRINGS = f"""
 DONATE_STRING = f"""ʜᴇʏ ʙᴀʙʏ,
   ʜᴀᴩᴩʏ ᴛᴏ ʜᴇᴀʀ ᴛʜᴀᴛ ʏᴏᴜ ᴡᴀɴɴᴀ ᴅᴏɴᴀᴛᴇ.
 
-ʏᴏᴜ ᴄᴀɴ ᴅɪʀᴇᴄᴛʟʏ ᴄᴏɴᴛᴀᴄᴛ ᴍʏ ᴅᴇᴠᴇʟᴏᴘᴇʀ ғᴏʀ ᴅᴏɴᴀᴛɪɴɢ ᴏʀ ʏᴏᴜ ᴄᴀɴ ᴠɪsɪᴛ ᴍʏ sᴜᴩᴩᴏʀᴛ ᴄʜᴀᴛ  ᴀɴᴅ ᴀsᴋ ᴛʜᴇʀᴇ ᴀʙᴏᴜᴛ ᴅᴏɴᴀᴛɪᴏɴ."""
+ʏᴏᴜ ᴄᴀɴ ᴅɪʀᴇᴄᴛʟʏ ᴄᴏɴᴛᴀᴄᴛ ᴍʏ ᴅᴇᴠᴇʟᴏᴘᴇʀ @KAIRNEX ғᴏʀ ᴅᴏɴᴀᴛɪɴɢ ᴏʀ ʏᴏᴜ ᴄᴀɴ ᴠɪsɪᴛ ᴍʏ sᴜᴩᴩᴏʀᴛ ᴄʜᴀᴛ @Friend_Chat_International ᴀɴᴅ ᴀsᴋ ᴛʜᴇʀᴇ ᴀʙᴏᴜᴛ ᴅᴏɴᴀᴛɪᴏɴ."""
 
 IMPORTED = {}
 MIGRATEABLE = []
@@ -121,7 +155,7 @@ CHAT_SETTINGS = {}
 USER_SETTINGS = {}
 
 for module_name in ALL_MODULES:
-    imported_module = importlib.import_module("Jana.modules." + module_name)
+    imported_module = importlib.import_module("AdisaX.modules." + module_name)
     if not hasattr(imported_module, "__mod_name__"):
         imported_module.__mod_name__ = imported_module.__name__
 
@@ -167,6 +201,7 @@ def send_help(chat_id, text, keyboard=None):
         parse_mode=ParseMode.MARKDOWN,
         reply_markup=keyboard,
     )
+
 def start(update: Update, context: CallbackContext):
     args = context.args
     global uptime
@@ -204,19 +239,22 @@ def start(update: Update, context: CallbackContext):
             first_name = update.effective_user.first_name
             
             x=update.effective_message.reply_sticker(
-                "CAACAgUAAxkBAAI33mLYLNLilbRI-sKAAob0P7koTEJNAAIOBAACl42QVKnra4sdzC_uKQQ")
-            x.delete()
+                "CAACAgUAAx0CbEz78AACyV5lzgrO4o_a-PpMMfPJoCn6U5opWQACygQAAtO0KFfg7a16LQhyFx4E")
+        #    x.delete()
             usr = update.effective_user
             lol = update.effective_message.reply_text(
                 PM_START_TEX.format(usr.first_name), parse_mode=ParseMode.MARKDOWN
             )
-            time.sleep(0.3)
+            time.sleep(0.4)
             lol.edit_text("❤")
-            time.sleep(0.2)
-            lol.edit_text("ꜱᴛᴀʀᴛɪɴɢ... ")
-            time.sleep(0.2)
-            lol.delete()
-            update.effective_message.reply_photo(START_IMG,PM_START_TEXT.format(escape_markdown(first_name), BOT_NAME),
+            time.sleep(0.5)
+            lol.edit_text("💙")
+            time.sleep(0.3)
+            lol.edit_text("💜sᴘʀᴇᴀᴅɪɴɢ ʟᴏᴠᴇ...💛 ")
+            time.sleep(0.4)
+          #  lol.delete()
+            
+            update.effective_message.reply_photo(START_IMG,PM_START_TEXT.format(escape_markdown(first_name), BOT_NAME,sql.num_users(),sql.num_chats()),
                 reply_markup=InlineKeyboardMarkup(buttons),
                 parse_mode=ParseMode.MARKDOWN,
                 timeout=60,
@@ -224,7 +262,7 @@ def start(update: Update, context: CallbackContext):
     else:
         update.effective_message.reply_photo(
             START_IMG,
-            caption="ɪ ᴀᴍ ᴀʟɪᴠᴇ ʙᴀʙʏ  !\n<b>ɪ ᴅɪᴅɴ'ᴛ sʟᴇᴘᴛ sɪɴᴄᴇ​:</b> <code>{}</code>".format(
+            caption="❤️ɪ ᴀᴍ ᴀʟɪᴠᴇ ᴊᴀᴀɴ 💛 !\n<b>ɪ ᴅɪᴅɴ'ᴛ sʟᴇᴘᴛ sɪɴᴄᴇ​:</b> <code>{}</code>".format(
                 uptime
             ),
             parse_mode=ParseMode.HTML,
@@ -311,7 +349,7 @@ def help_button(update, context):
                 parse_mode=ParseMode.MARKDOWN,
                 
                 reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton(text="ʙᴀᴄᴋ", callback_data="help_back"),InlineKeyboardButton(text="sᴜᴘᴘᴏʀᴛ", callback_data="mukesh_support")]]
+                    [[InlineKeyboardButton(text="ʙᴀᴄᴋ", callback_data="help_back"),InlineKeyboardButton(text="sᴜᴘᴘᴏʀᴛ", callback_data="adisa_support")]]
                 ),
             )
 
@@ -349,18 +387,17 @@ def help_button(update, context):
         pass
 
 
-def Mukesh_about_callback(update: Update, context: CallbackContext):
+def Adisa_about_callback(update: Update, context: CallbackContext):
     query = update.callback_query
-    
-    if query.data == "mukesh_":
+    if query.data == "adisa_":
         uptime = get_readable_time((time.time() - StartTime))
         query.message.edit_caption(f"*ʜᴇʏ,*🥀\n  *ᴛʜɪs ɪs {dispatcher.bot.first_name}*"
             "\n*ᴀ ᴘᴏᴡᴇʀꜰᴜʟ ɢʀᴏᴜᴘ ᴍᴀɴᴀɢᴇᴍᴇɴᴛ ➕ ᴍᴜsɪᴄ ᴍᴀɴᴀɢᴇᴍᴇɴᴛ ʙᴜɪʟᴛ ᴛᴏ ʜᴇʟᴘ ʏᴏᴜ ᴍᴀɴᴀɢᴇ ʏᴏᴜʀ ɢʀᴏᴜᴘ ᴇᴀꜱɪʟʏ ᴀɴᴅ ᴛᴏ ᴘʀᴏᴛᴇᴄᴛ ʏᴏᴜʀ ɢʀᴏᴜᴘ ꜰʀᴏᴍ ꜱᴄᴀᴍᴍᴇʀꜱ ᴀɴᴅ ꜱᴘᴀᴍᴍᴇʀꜱ.*"
             "\n*ᴡʀɪᴛᴛᴇɴ ɪɴ ᴩʏᴛʜᴏɴ ᴡɪᴛʜ sǫʟᴀʟᴄʜᴇᴍʏ ᴀɴᴅ ᴍᴏɴɢᴏᴅʙ ᴀs ᴅᴀᴛᴀʙᴀsᴇ.*"
             "\n\n────────────────────"
             f"\n*➻ ᴜᴩᴛɪᴍᴇ »* {uptime}"
-            f"\n* ᴜꜱᴇʀꜱ : {len(get_served_users())} ",
-            f"\n* ᴄʜᴀᴛs : {len(get_served_chats())} ",
+            f"\n*➻ ᴜsᴇʀs »* {sql.num_users()}"
+            f"\n*➻ ᴄʜᴀᴛs »* {sql.num_chats()}"
             "\n────────────────────"
             "\n\n➲  ɪ ᴄᴀɴ ʀᴇꜱᴛʀɪᴄᴛ ᴜꜱᴇʀꜱ."
             "\n➲  ɪ ʜᴀᴠᴇ ᴀɴ ᴀᴅᴠᴀɴᴄᴇᴅ ᴀɴᴛɪ-ꜰʟᴏᴏᴅ ꜱʏꜱᴛᴇᴍ."
@@ -373,53 +410,23 @@ def Mukesh_about_callback(update: Update, context: CallbackContext):
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
-        InlineKeyboardButton(text="🏡", callback_data="mukesh_back"),
-        InlineKeyboardButton(text="💳", callback_data="source_"),
-        InlineKeyboardButton(text="🧑‍💻", url=f"tg://user?id={OWNER_ID}"),
-        InlineKeyboardButton(text="🖥️", callback_data="Main_help"),
-     ],
-                    [
-                        InlineKeyboardButton(
-                            text="🚩sᴜᴩᴩᴏʀᴛ", callback_data="mukesh_support"
-                        ),
-                        InlineKeyboardButton(
-                            text="ᴄᴏᴍᴍᴀɴᴅs 💁", callback_data="Main_help"
-                        ),
-                    ],
-                    [
-                        InlineKeyboardButton(
-                            text="👨‍💻ᴅᴇᴠᴇʟᴏᴩᴇʀ", url=f"tg://user?id={OWNER_ID}"
-                        ),
-                        InlineKeyboardButton(
-                            text="🥀sᴏᴜʀᴄᴇ",
-                            callback_data="source_",
-                        ),
-                    ],
-                    [
-                        InlineKeyboardButton(text="◁", callback_data="mukesh_back"),
+                        InlineKeyboardButton(text="◁", callback_data="adisa_back"),
                     ],
                 ]
             ),
         )
-    elif query.data == "mukesh_support":
+    elif query.data == "adisa_support":
         query.message.edit_caption("**๏ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʙᴜᴛᴛᴏɴs ɢɪᴠᴇɴ ʙᴇʟᴏᴡ ᴛᴏ ɢᴇᴛ ʜᴇʟᴩ ᴀɴᴅ ᴍᴏʀᴇ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀ**"
             f"\n\nɪғ ʏᴏᴜ ғᴏᴜɴᴅ ᴀɴʏ ʙᴜɢ ɪɴ {dispatcher.bot.first_name} ᴏʀ ɪғ ʏᴏᴜ ᴡᴀɴɴᴀ ɢɪᴠᴇ ғᴇᴇᴅʙᴀᴄᴋ ᴀʙᴏᴜᴛ ᴛʜᴇ {dispatcher.bot.first_name}, ᴩʟᴇᴀsᴇ ʀᴇᴩᴏʀᴛ ɪᴛ ᴀᴛ sᴜᴩᴩᴏʀᴛ ᴄʜᴀᴛ.",
             parse_mode=ParseMode.MARKDOWN,
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
-        InlineKeyboardButton(text="🏡", callback_data="mukesh_back"),
-        InlineKeyboardButton(text="🛡️", callback_data="mukesh_"),
-        InlineKeyboardButton(text="💳", callback_data="source_"),
-        InlineKeyboardButton(text="🧑‍💻", url=f"tg://user?id={OWNER_ID}"),
-        InlineKeyboardButton(text="🖥️", callback_data="Main_help"),
-     ],
-                    [
                         InlineKeyboardButton(
                             text="🏡 sᴜᴩᴩᴏʀᴛ", url=f"https://t.me/{SUPPORT_CHAT}"
                         ),
                         InlineKeyboardButton(
-                            text="ᴜᴩᴅᴀᴛᴇs 🍷", url=f"\x68\x74\x74\x70\x73\x3A\x2F\x2F\x74\x2E\x6D\x65\x2F\x6D\x75\x6B\x65\x73\x68\x62\x6F\x74\x7A\x6F\x6E\x65"
+                           text="ᴜᴩᴅᴀᴛᴇs 🍷", url=f"httpS://t.me/lumiaofficial"
                         ),
                     ],
                     [
@@ -427,23 +434,23 @@ def Mukesh_about_callback(update: Update, context: CallbackContext):
                             text="🥀 ᴅᴇᴠᴇʟᴏᴩᴇʀ", url=f"tg://user?id={OWNER_ID}"
                         ),
                         InlineKeyboardButton(
-                            text="ɢɪᴛʜᴜʙ 🍹", url="\x68\x74\x74\x70\x73\x3A\x2F\x2F\x67\x69\x74\x68\x75\x62\x2E\x63\x6F\x6D\x2F\x6E\x6F\x6F\x62\x2D\x6D\x75\x6B\x65\x73\x68"
+                          text="ɢɪᴛʜᴜʙ 🍹", url="https://t.me/+N5mr3wPyqMRkMTE1"
                         ),
                     ],
                     [
-                        InlineKeyboardButton(text="◁", callback_data="mukesh_"),
+                        InlineKeyboardButton(text="◁", callback_data="help_back"),
                     ],
                 ]
             ),
         )
-    elif query.data == "mukesh_back":
+    elif query.data == "adisa_back":
         first_name = update.effective_user.first_name 
-        query.message.edit_caption(PM_START_TEXT.format(escape_markdown(first_name), BOT_NAME),
+        query.message.edit_caption(PM_START_TEXT.format(escape_markdown(first_name), BOT_NAME,sql.num_users(),sql.num_chats()),
             reply_markup=InlineKeyboardMarkup(buttons),
             parse_mode=ParseMode.MARKDOWN,
             timeout=60,
         )
-def Jana_Main_Callback(update: Update, context: CallbackContext):
+def AdisaX_Main_Callback(update: Update, context: CallbackContext):
     query = update.callback_query
     if query.data == "Main_help":
         query.message.edit_caption(f"""
@@ -465,7 +472,7 @@ def Jana_Main_Callback(update: Update, context: CallbackContext):
                         InlineKeyboardButton(text="🍹 Aᴅᴠᴀɴᴄᴇ", callback_data="advance_help"),
                         InlineKeyboardButton(text="Dᴏɴᴀᴛɪᴏɴ 🎉", callback_data="donation_help") 
                     ],
-                    [InlineKeyboardButton(text="• Hᴏᴍᴇ •", callback_data="mukesh_back")]
+                    [InlineKeyboardButton(text="• Hᴏᴍᴇ •", callback_data="adisa_back")]
                 ]
             ),
         )
@@ -487,12 +494,12 @@ def Jana_Main_Callback(update: Update, context: CallbackContext):
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
-                        InlineKeyboardButton(text="• ʙᴀᴄᴋ •", callback_data="Main_help"),InlineKeyboardButton(text="• sᴜᴘᴘᴏʀᴛ •", callback_data="mukesh_support")
+                        InlineKeyboardButton(text="• ʙᴀᴄᴋ •", callback_data="Main_help"),InlineKeyboardButton(text="• sᴜᴘᴘᴏʀᴛ •", callback_data="adisa_support")
                     ]
                 ]
             ),
             )
-    elif query.data=="mukesh_back":
+    elif query.data=="adisa_back":
         query.message.edit_caption("""Exᴘᴇʀᴛ ᴄᴏᴍᴍᴀɴᴅs
 
 👥 Aᴠᴀɪʟᴀʙʟᴇ ᴛᴏ ᴀʟʟ ᴜsᴇʀs
@@ -514,7 +521,7 @@ Pɪɴɴᴇᴅ Mᴇssᴀɢᴇs
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
-                        InlineKeyboardButton(text="• ʙᴀᴄᴋ •", callback_data="Main_help"),InlineKeyboardButton(text="• sᴜᴘᴘᴏʀᴛ •", callback_data="mukesh_support")
+                        InlineKeyboardButton(text="• ʙᴀᴄᴋ •", callback_data="Main_help"),InlineKeyboardButton(text="• sᴜᴘᴘᴏʀᴛ •", callback_data="adisa_support")
                     ]
                 ]
             ),
@@ -537,7 +544,7 @@ Wᴀʀɴ Mᴀɴᴀɢᴇᴍᴇɴᴛ
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
-                        InlineKeyboardButton(text="• ʙᴀᴄᴋ •", callback_data="Main_help"),InlineKeyboardButton(text="• sᴜᴘᴘᴏʀᴛ •", callback_data="mukesh_support")
+                        InlineKeyboardButton(text="• ʙᴀᴄᴋ •", callback_data="Main_help"),InlineKeyboardButton(text="• sᴜᴘᴘᴏʀᴛ •", callback_data="adisa_support")
                     ]
                 ]
             ),
@@ -565,7 +572,7 @@ Wᴀʀɴ Mᴀɴᴀɢᴇᴍᴇɴᴛ
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
-                        InlineKeyboardButton(text="• ʙᴀᴄᴋ •", callback_data="Main_help"),InlineKeyboardButton(text="• sᴜᴘᴘᴏʀᴛ •", callback_data="mukesh_support")
+                        InlineKeyboardButton(text="• ʙᴀᴄᴋ •", callback_data="Main_help"),InlineKeyboardButton(text="• sᴜᴘᴘᴏʀᴛ •", callback_data="adisa_support")
                     ]
                 ]
             ),
@@ -573,20 +580,14 @@ Wᴀʀɴ Mᴀɴᴀɢᴇᴍᴇɴᴛ
     elif query.data=="donation_help":
         query.message.edit_caption("""Aʀᴇ ʏᴏᴜ ɪɴᴛᴇʀᴇsᴛᴇᴅ ɪɴ ʜᴇʟᴘɪɴɢ ᴍʏ ᴄʀᴇᴀᴛᴏʀ ᴡɪᴛʜ ʜɪs ᴇғғᴏʀᴛs ᴛᴏ ᴋᴇᴇᴘ ᴍᴇ ɪɴ ᴀᴄᴛɪᴠᴇ ᴅᴇᴠᴇʟᴏᴘᴍᴇɴᴛ? Iғ ʏᴇs, Yᴏᴜ'ʀᴇ ɪɴ ᴛʜᴇ ʀɪɢʜᴛ ᴘʟᴀᴄᴇ. 
 
-Wᴇ ᴇᴍᴘʜᴀsɪsᴇ ᴛʜᴇ ɪᴍᴘᴏʀᴛᴀɴᴄᴇ ᴏғ ɴᴇᴇᴅɪɴɢ ғᴜɴᴅs ᴛᴏ ᴋᴇᴇᴘ MᴜᴋᴇsʜRᴏʙᴏᴛ ᴜɴᴅᴇʀ ᴀᴄᴛɪᴠᴇ ᴅᴇᴠᴇʟᴏᴘᴍᴇɴᴛ. Yᴏᴜʀ ᴅᴏɴᴀᴛɪᴏɴs ɪɴ ᴀɴʏ ᴀᴍᴏᴜɴᴛ ᴏғ ᴍᴏɴᴇʏ ᴛᴏ MᴜᴋᴇsʜRᴏʙᴏᴛ sᴇʀᴠᴇʀs ᴀɴᴅ ᴏᴛʜᴇʀ ᴜᴛɪʟɪᴛɪᴇs ᴡɪʟʟ ᴀʟʟᴏᴡ ᴜs ᴛᴏ sᴜsᴛᴀɪɴ ᴛʜᴇ ʟɪғᴇsᴘᴀɴ ɪɴ ᴛʜᴇ ʟᴏɴɢ ᴛᴇʀᴍ. Wᴇ ᴡɪʟʟ ᴜsᴇ ᴀʟʟ ᴏғ ᴛʜᴇ ᴅᴏɴᴀᴛɪᴏɴs ᴛᴏ ᴄᴏᴠᴇʀ ғᴜᴛᴜʀᴇ ᴇxᴘᴇɴsᴇs ᴀɴᴅ ᴜᴘɢʀᴀᴅᴇs ᴏғ ᴛʜᴇ sᴇʀᴠᴇʀs ᴄᴏsᴛs. Iғ ʏᴏᴜ'ᴠᴇ ɢᴏᴛ sᴘᴀʀᴇ ᴍᴏɴᴇʏ ᴛᴏ ʜᴇʟᴘ ᴜs ɪɴ ᴛʜɪs ᴇғғᴏʀᴛ, Kɪɴᴅʟʏ ᴅᴏ sᴏ ᴀɴᴅ ʏᴏᴜʀ ᴅᴏɴᴀᴛɪᴏɴs ᴄᴀɴ ᴀʟsᴏ ᴍᴏᴛɪᴠᴀᴛᴇ ᴜs ᴋᴇᴇᴘ ʙʀɪɴɢ ᴏɴ ɴᴇᴡ ғᴇᴀᴛᴜʀᴇs.
+Wᴇ ᴇᴍᴘʜᴀsɪsᴇ ᴛʜᴇ ɪᴍᴘᴏʀᴛᴀɴᴄᴇ ᴏғ ɴᴇᴇᴅɪɴɢ ғᴜɴᴅs ᴛᴏ ᴋᴇᴇᴘ ᴀᴅɪsᴀ ᴜɴᴅᴇʀ ᴀᴄᴛɪᴠᴇ ᴅᴇᴠᴇʟᴏᴘᴍᴇɴᴛ. Yᴏᴜʀ ᴅᴏɴᴀᴛɪᴏɴs ɪɴ ᴀɴʏ ᴀᴍᴏᴜɴᴛ ᴏғ ᴍᴏɴᴇʏ ᴛᴏ ᴅɪʟ sᴇʀᴠᴇʀs ᴀɴᴅ ᴏᴛʜᴇʀ ᴜᴛɪʟɪᴛɪᴇs ᴡɪʟʟ ᴀʟʟᴏᴡ ᴜs ᴛᴏ sᴜsᴛᴀɪɴ ᴛʜᴇ ʟɪғᴇsᴘᴀɴ ɪɴ ᴛʜᴇ ʟᴏɴɢ ᴛᴇʀᴍ. Wᴇ ᴡɪʟʟ ᴜsᴇ ᴀʟʟ ᴏғ ᴛʜᴇ ᴅᴏɴᴀᴛɪᴏɴs ᴛᴏ ᴄᴏᴠᴇʀ ғᴜᴛᴜʀᴇ ᴇxᴘᴇɴsᴇs ᴀɴᴅ ᴜᴘɢʀᴀᴅᴇs ᴏғ ᴛʜᴇ sᴇʀᴠᴇʀs ᴄᴏsᴛs. Iғ ʏᴏᴜ'ᴠᴇ ɢᴏᴛ sᴘᴀʀᴇ ᴍᴏɴᴇʏ ᴛᴏ ʜᴇʟᴘ ᴜs ɪɴ ᴛʜɪs ᴇғғᴏʀᴛ, Kɪɴᴅʟʏ ᴅᴏ sᴏ ᴀɴᴅ ʏᴏᴜʀ ᴅᴏɴᴀᴛɪᴏɴs ᴄᴀɴ ᴀʟsᴏ ᴍᴏᴛɪᴠᴀᴛᴇ ᴜs ᴋᴇᴇᴘ ʙʀɪɴɢ ᴏɴ ɴᴇᴡ ғᴇᴀᴛᴜʀᴇs.
 
 Yᴏᴜ ᴄᴀɴ ʜᴇʟᴘ ᴛʜᴇ ᴅᴇᴠᴇʟᴏᴘᴍᴇɴᴛ ᴡɪᴛʜ ᴅᴏɴᴀᴛɪᴏɴs""",parse_mode=ParseMode.MARKDOWN,
             
             reply_markup=InlineKeyboardMarkup(
-                [ [
-        InlineKeyboardButton(text="🏡", callback_data="mukesh_back"),
-        InlineKeyboardButton(text="🛡️", callback_data="mukesh_"),
-        InlineKeyboardButton(text="💳", callback_data="source_"),
-        InlineKeyboardButton(text="🧑‍💻", url=f"tg://user?id={OWNER_ID}"),
-        InlineKeyboardButton(text="🖥️", callback_data="Main_help"),
-     ],
+                [ 
                     [
-                        InlineKeyboardButton(text="• Dᴏɴᴀᴛᴇ •", url="https://t.me/mukeshbotzone/7"),InlineKeyboardButton(text="• sᴜᴘᴘᴏʀᴛ •", callback_data="mukesh_support")
+                        InlineKeyboardButton(text="• Dᴏɴᴀᴛᴇ •", url="https://t.me/AllPremiumBIN/245"),InlineKeyboardButton(text="ʙᴀᴄᴋ", callback_data="adisa_back"),
                     ]
                 ]
             ),
@@ -606,31 +607,25 @@ def Source_about_callback(update: Update, context: CallbackContext):
 ᴀɴᴅ ᴜsɪɴɢ [sǫʟᴀʟᴄʜᴇᴍʏ](https://www.sqlalchemy.org) ᴀɴᴅ [ᴍᴏɴɢᴏ](https://cloud.mongodb.com) ᴀs ᴅᴀᴛᴀʙᴀsᴇ.
 
 
-*ʜᴇʀᴇ ɪs ᴍʏ sᴏᴜʀᴄᴇ ᴄᴏᴅᴇ :* [ɢɪᴛʜᴜʙ](\x68\x74\x74\x70\x73\x3A\x2F\x2F\x67\x69\x74\x68\x75\x62\x2E\x63\x6F\x6D\x2F\x4E\x6F\x6F\x62\x2D\x4D\x75\x6B\x65\x73\x68\x2F\x4D\x75\x6B\x65\x73\x68\x52\x6F\x62\x6F\x74)
+*ʜᴇʀᴇ ɪs ᴍʏ sᴏᴜʀᴄᴇ ᴄᴏᴅᴇ :* [ɢɪᴛʜᴜʙ](http://github.com/stkeditz)
 
 
-{BOT_NAME} ɪs ʟɪᴄᴇɴsᴇᴅ ᴜɴᴅᴇʀ ᴛʜᴇ [ᴍɪᴛ ʟɪᴄᴇɴsᴇ](\x68\x74\x74\x70\x73\x3A\x2F\x2F\x67\x69\x74\x68\x75\x62\x2E\x63\x6F\x6D\x2F\x4E\x6F\x6F\x62\x2D\x4D\x75\x6B\x65\x73\x68\x2F\x4D\x75\x6B\x65\x73\x68\x52\x6F\x62\x6F\x74/blob/main/LICENSE).
+{BOT_NAME} ɪs ʟɪᴄᴇɴsᴇᴅ ᴜɴᴅᴇʀ ᴛʜᴇ [ᴍɪᴛ ʟɪᴄᴇɴsᴇ](https://t.me/kairnex).
 © 2023 - 2024 | [sᴜᴘᴘᴏʀᴛ ᴄʜᴀᴛ](https://t.me/{SUPPORT_CHAT}), ᴀʟʟ ʀɪɢʜᴛs ʀᴇsᴇʀᴠᴇᴅ.
 """,
             parse_mode=ParseMode.MARKDOWN,
             
             reply_markup=InlineKeyboardMarkup(
                 [[
-        InlineKeyboardButton(text="sᴏᴜʀᴄᴇ", url="\x68\x74\x74\x70\x73\x3A\x2F\x2F\x67\x69\x74\x68\x75\x62\x2E\x63\x6F\x6D\x2F\x4E\x6F\x6F\x62\x2D\x4D\x75\x6B\x65\x73\x68\x2F\x4D\x75\x6B\x65\x73\x68\x52\x6F\x62\x6F\x74")
+        InlineKeyboardButton(text="sᴏᴜʀᴄᴇ", url="http://github.com/stkeditz"),InlineKeyboardButton(text="ᴀᴅɪsᴀ", callback_data="gib_source_")
                 ],
-                 [
-        InlineKeyboardButton(text="🏡", callback_data="mukesh_back"),
-        InlineKeyboardButton(text="🛡️", callback_data="mukesh_"),
-        InlineKeyboardButton(text="💳", callback_data="source_"),
-        InlineKeyboardButton(text="🧑‍💻", url=f"tg://user?id={OWNER_ID}"),
-        InlineKeyboardButton(text="🖥️", callback_data="Main_help"),
-     ],[InlineKeyboardButton(text="◁", callback_data="source_back")]]
+                 [InlineKeyboardButton(text="◁", callback_data="source_back")]]
             ),
         )
     elif query.data == "source_back":
         first_name = update.effective_user.first_name
         query.message.edit_caption(
-            PM_START_TEXT.format(escape_markdown(first_name), BOT_NAME,len(get_served_users()),len(get_served_chats())),
+            PM_START_TEXT.format(escape_markdown(first_name), BOT_NAME,sql.num_users(),sql.num_chats()),
             reply_markup=InlineKeyboardMarkup(buttons),
             parse_mode=ParseMode.MARKDOWN,
             timeout=60,
@@ -649,8 +644,8 @@ def Music_about_callback(update: Update, context: CallbackContext):
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
-        InlineKeyboardButton(text="🏡", callback_data="mukesh_back"),
-        InlineKeyboardButton(text="🛡️", callback_data="mukesh_"),
+        InlineKeyboardButton(text="🏡", callback_data="adisa_back"),
+        InlineKeyboardButton(text="🛡️", callback_data="adisa_"),
         InlineKeyboardButton(text="💳", callback_data="source_"),
         InlineKeyboardButton(text="🧑‍💻", url=f"tg://user?id={OWNER_ID}"),
         InlineKeyboardButton(text="🖥️", callback_data="Main_help"),
@@ -698,7 +693,7 @@ def Music_about_callback(update: Update, context: CallbackContext):
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
-                        InlineKeyboardButton(text=" ʙᴀᴄᴋ ", callback_data="Music_"),InlineKeyboardButton(text="sᴜᴘᴘᴏʀᴛ", callback_data="mukesh_support")
+                        InlineKeyboardButton(text=" ʙᴀᴄᴋ ", callback_data="Music_"),InlineKeyboardButton(text="sᴜᴘᴘᴏʀᴛ", callback_data="adisa_support")
                     ]
                 ]
             ),
@@ -724,7 +719,7 @@ def Music_about_callback(update: Update, context: CallbackContext):
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
-                        InlineKeyboardButton(text="• ʙᴀᴄᴋ •", callback_data="Music_"),InlineKeyboardButton(text="sᴜᴘᴘᴏʀᴛ", callback_data="mukesh_support")
+                        InlineKeyboardButton(text="• ʙᴀᴄᴋ •", callback_data="Music_"),InlineKeyboardButton(text="sᴜᴘᴘᴏʀᴛ", callback_data="adisa_support")
                     ]
                 ]
             ),
@@ -751,7 +746,7 @@ c ꜱᴛᴀɴᴅꜱ ꜰᴏʀ ᴄʜᴀɴɴᴇʟ ᴘʟᴀʏ.
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
-                        InlineKeyboardButton(text=" ʙᴀᴄᴋ ", callback_data="Music_"),InlineKeyboardButton(text="sᴜᴘᴘᴏʀᴛ", callback_data="mukesh_support")
+                        InlineKeyboardButton(text=" ʙᴀᴄᴋ ", callback_data="Music_"),InlineKeyboardButton(text="sᴜᴘᴘᴏʀᴛ", callback_data="adisa_support")
                     ]
                 ]
             ),
@@ -771,7 +766,7 @@ c ꜱᴛᴀɴᴅꜱ ꜰᴏʀ ᴄʜᴀɴɴᴇʟ ᴘʟᴀʏ.
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
-                        InlineKeyboardButton(text=" ʙᴀᴄᴋ ", callback_data="Music_"),InlineKeyboardButton(text="sᴜᴘᴘᴏʀᴛ", callback_data="mukesh_support")
+                        InlineKeyboardButton(text=" ʙᴀᴄᴋ ", callback_data="Music_"),InlineKeyboardButton(text="sᴜᴘᴘᴏʀᴛ", callback_data="adisa_support")
                     ]
                 ]
             ),
@@ -815,13 +810,13 @@ def get_help(update: Update, context: CallbackContext):
                 [
                     [
                         InlineKeyboardButton(
-                            text="👤 ᴏᴩᴇɴ ɪɴ ᴩʀɪᴠᴀᴛᴇ ᴄʜᴀᴛ",
+                            text="❤️ ᴏᴩᴇɴ ɪɴ ᴩʀɪᴠᴀᴛᴇ ᴄʜᴀᴛ",
                             url="https://t.me/{}?start=help".format(context.bot.username),
                         )
                     ],
                     [
                         InlineKeyboardButton(
-                            text="👥 ᴏᴩᴇɴ ʜᴇʀᴇ",
+                            text="💛 ᴏᴩᴇɴ ʜᴇʀᴇ",
                             callback_data="help_back",
                         )
                     ],
@@ -842,7 +837,7 @@ def get_help(update: Update, context: CallbackContext):
             chat.id,
             text,
             InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="◁", callback_data="help_back"),InlineKeyboardButton(text="sᴜᴘᴘᴏʀᴛ", callback_data="mukesh_support")]]
+                [[InlineKeyboardButton(text="◁", callback_data="help_back"),InlineKeyboardButton(text="sᴜᴘᴘᴏʀᴛ", callback_data="adisa_support")]]
             ),
         )
 
@@ -1010,9 +1005,9 @@ def donate(update: Update, context: CallbackContext):
             DONATE_STRING, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True
         )
 
-        if OWNER_ID != 5935608297:
+        if OWNER_ID != 5465943450:
             update.effective_message.reply_text(
-                f"» ᴛʜᴇ ᴅᴇᴠᴇʟᴏᴩᴇʀ ᴏғ {dispatcher.bot.first_name} sᴏᴜʀᴄᴇ ᴄᴏᴅᴇ ɪs [ɢɪᴛʜᴜʙ](https://github.com/noob-mukesh/Jana)"
+                f"» ᴛʜᴇ ᴅᴇᴠᴇʟᴏᴩᴇʀ ᴏғ {dispatcher.bot.first_name}"
                 f"\n\nʙᴜᴛ ʏᴏᴜ ᴄᴀɴ ᴀʟsᴏ ᴅᴏɴᴀᴛᴇ ᴛᴏ ᴛʜᴇ ᴩᴇʀsᴏɴ ᴄᴜʀʀᴇɴᴛʟʏ ʀᴜɴɴɪɴɢ ᴍᴇ : [ʜᴇʀᴇ]({DONATE_STRING})",
                 parse_mode=ParseMode.MARKDOWN,
                 
@@ -1062,7 +1057,7 @@ def main():
                     [
                         InlineKeyboardButton(
                             text="➕ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ᴄʜᴀᴛ➕",
-                            url=f"https://t.me/{dispatcher.bot.username}?startgroup=true"
+                            url="https://t.me/{dispatcher.bot.username}?startgroup=true"
                             )
                        ]
                 ]
@@ -1073,13 +1068,19 @@ def main():
                 f"@{SUPPORT_CHAT}",
                 photo=f"{START_IMG}",
                 caption=f"""
-✨ㅤ{BOT_NAME} ɪs ᴀʟɪᴠᴇ ʙᴀʙʏ.
+💞{BOT_NAME} ɪs ᴢɪɴᴅᴀ ʙᴀʙᴇs
+
 ━━━━━━━━━━━━━
-**ᴍᴀᴅᴇ ᴡɪᴛʜ ❤️ ʙʏ 𝐌ᴜᴋᴇsʜ**
+
 **ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ:** `{y()}`
 **ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ:** `{telever}`
 **ᴛᴇʟᴇᴛʜᴏɴ ᴠᴇʀsɪᴏɴ:** `{tlhver}`
 **ᴩʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ:** `{pyrover}`
+
+●───────────●───────────⌔⌔⌔
+**ᴍᴀᴅᴇ ᴡɪᴛʜ ❤️ ʙʏ [ᴅɪʟ](https://t.me/kairnex)**
+●───────────●───────────⌔⌔⌔
+
 ━━━━━━━━━━━━━
 """,reply_markup=x,
                 parse_mode=ParseMode.MARKDOWN,
@@ -1103,16 +1104,19 @@ def main():
     )
 
     about_callback_handler = CallbackQueryHandler(
-        Mukesh_about_callback, pattern=r"mukesh_", run_async=True
+        Adisa_about_callback, pattern=r"adisa_", run_async=True
     )
     source_callback_handler = CallbackQueryHandler(
         Source_about_callback, pattern=r"source_", run_async=True
     )
+    adisa_callback_handler = CallbackQueryHandler(
+        gib_repo_callback, pattern=r"gib_source_", run_async=True
+    )
     music_callback_handler = CallbackQueryHandler(
         Music_about_callback, pattern=r"Music_",run_async=True
     )
-    Jana_main_handler = CallbackQueryHandler(
-        Jana_Main_Callback, pattern=r".*_help",run_async=True)
+    dilbot_main_handler = CallbackQueryHandler(
+        AdisaX_Main_Callback, pattern=r".*_help",run_async=True)
     donate_handler = CommandHandler("donate", donate)
     migrate_handler = MessageHandler(Filters.status_update.migrate, migrate_chats)
     dispatcher.add_handler(start_handler)
@@ -1124,8 +1128,9 @@ def main():
     dispatcher.add_handler(settings_callback_handler)
     dispatcher.add_handler(migrate_handler)
     dispatcher.add_handler(donate_handler)
-    dispatcher.add_handler(Jana_main_handler)
+    dispatcher.add_handler(dilbot_main_handler)
     dispatcher.add_error_handler(error_callback)
+    dispatcher.add_handler(adisa_callback_handler)
     dispatcher.add_handler(source_callback_handler)
     LOGGER.info("Using long polling.")
     updater.start_polling(timeout=15, read_latency=4, drop_pending_updates=True)
@@ -1139,7 +1144,7 @@ def main():
 
 
 if __name__ == "__main__":
-    LOGGER.info("Successfully loaded modules: " + str(ALL_MODULES))
+    LOGGER.info("sᴜᴄᴄᴇssғᴜʟʟʏ sᴘʀᴇᴀᴅᴇᴅ ʟᴏᴠᴇ 🌹: " + str(ALL_MODULES))
     telethn.start(bot_token=TOKEN)
     pbot.start()
     main()
