@@ -1,15 +1,15 @@
 # Config files, logs and stuff
-MukeshRobot/modules/helper_funcs/temp.txt
-MukeshRobot/elevated_users.json
-MukeshRobot/config.py
-MukeshRobot/config.ini
+Jana/modules/helper_funcs/temp.txt
+Jana/elevated_users.json
+Jana/config.py
+Jana/config.ini
 log.txt
 kangsticker.png
 updates.txt
 
 # Session files
-MukeshRobot/*.session
-MukeshRobot/*.session-journal
+Jana/*.session
+Jana/*.session-journal
 Mukesh.session-journal
 *.session
 

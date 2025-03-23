@@ -64,11 +64,11 @@ RUN apt update && apt upgrade -y && \
 # Pypi package Repo upgrade
 RUN pip3 install --upgrade pip setuptools
 
-RUN git clone https://github.com/Noob-Mukesh/MukeshRobot /root/MukeshRobot
-WORKDIR /root/MukeshRobot
+RUN git clone https://github.com/Noob-Mukesh/Jana /root/Jana
+WORKDIR /root/Jana
 
-#Copy config file to /root/MukeshRobot/MukeshRobot
-COPY ./MukeshRobot/config.py ./MukeshRobot/config.py* /root/MukeshRobot/MukeshRobot/
+#Copy config file to /root/Jana/Jana
+COPY ./Jana/config.py ./Jana/config.py* /root/Jana/Jana/
 
 ENV PATH="/home/bot/bin:$PATH"
 
@@ -76,4 +76,4 @@ ENV PATH="/home/bot/bin:$PATH"
 RUN pip3 install -U -r requirements.txt
 
 # Starting Worker
-CMD ["python3","-m","MukeshRobot"]
+CMD ["python3","-m","Jana"]
